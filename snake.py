@@ -12,7 +12,7 @@ class Snake:
     def update(self, dtx: int, dty: int, empty_cells) -> None:
         if [self.x, self.y] == self.apple:
             self.body.append((self.x, self.y))
-            rnd_num = randint(0, len(empty_cells))
+            rnd_num = randint(0, len(empty_cells) - 1)
             self.apple = empty_cells[rnd_num]
             self.count += 1
         elif self.body:

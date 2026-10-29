@@ -9,6 +9,7 @@ GRID_SIZE = 40
 BLOCK_SIZE = GRID_SIZE - 2
 HEIGHT = SCREEN.get_height() // GRID_SIZE
 WIDTH = SCREEN.get_width() // GRID_SIZE
+TOTAL = (HEIGHT - 1) * WIDTH
 
 BG = pygame.image.load("assets/Background.png")
 
@@ -39,12 +40,17 @@ def play():
             if event.type == pygame.QUIT:
                 sys.exit()
 
+        if snake.count == TOTAL:
+            running = False
+            win()
+
 
         SCREEN.blit(BG, (0, 0))
         apple = pygame.Rect(snake.apple[0] * GRID_SIZE, snake.apple[1] * GRID_SIZE, BLOCK_SIZE, BLOCK_SIZE)
         pygame.draw.rect(SCREEN, "red", apple)
         # apple1 = pygame.Rect((WIDTH - 1) * GRID_SIZE, HEIGHT * GRID_SIZE, BLOCK_SIZE, BLOCK_SIZE)
         # pygame.draw.rect(SCREEN, "red", apple1)
+
 
 
         keys = pygame.key.get_pressed()
@@ -63,13 +69,9 @@ def play():
 
         print(snake.x + dtx, snake.y + dty)
 
-        if snake.x + dtx < 0 or snake.x + dtx == WIDTH or snake.y + dty < 0 or snake.y + dty == HEIGHT:
+        if snake.x + dtx < 0 or snake.x + dtx == WIDTH or snake.y + dty < 1 or snake.y + dty == HEIGHT or [snake.x, snake.y] in snake.body:
                 running = False
-                print("error")
-                game_over()
-        elif [snake.x, snake.y] in snake.body:
-            running = False
-            game_over()
+                game_over(snake.count)
 
 
         snake.update(dtx, dty, zeros)
@@ -85,7 +87,7 @@ def play():
                 if grid[column][row] == 1:
                     rect = pygame.Rect((row + 0) * GRID_SIZE, (column + 0) * GRID_SIZE, BLOCK_SIZE, BLOCK_SIZE)
                     pygame.draw.rect(SCREEN, "chartreuse3", rect)
-                elif grid[column][row] == 0:
+                elif grid[column][row] == 0 and column != 0:
                     zeros.append([row, column])
 
         bar = pygame.Surface((SCREEN.get_width(), GRID_SIZE), pygame.SRCALPHA)  # per-pixel alpha
@@ -107,7 +109,7 @@ def play():
         dt = clock.tick(10) / 1000
 
 
-def game_over():
+def game_over(score):
     while True:
         SCREEN.blit(BG, (0, 0))
 
@@ -116,12 +118,17 @@ def game_over():
         MENU_TEXT = get_font(100).render("GAME OVER", True, "#b68f40")
         MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
 
-        PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 250),
+        str = f'SCORE: {score}'
+        score_text = get_font(75).render(str, True, "#d7fcd4")
+        score_rect = score_text.get_rect(center=(640, 200))
+
+        PLAY_BUTTON = Button(image=pygame.image.load("assets/Play Rect.png"), pos=(640, 350),
                              text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(640, 400),
+        QUIT_BUTTON = Button(image=pygame.image.load("assets/Quit Rect.png"), pos=(640, 500),
                              text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
 
         SCREEN.blit(MENU_TEXT, MENU_RECT)
+        SCREEN.blit(score_text, score_rect)
 
         for button in [PLAY_BUTTON, QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
@@ -138,6 +145,24 @@ def game_over():
                     pygame.quit()
                     sys.exit()
 
+        pygame.display.update()
+
+def win():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+        SCREEN.blit(BG, (0, 0))
+        MENU_TEXT = get_font(100).render("YOU WON", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
+
+        score_text = get_font(50).render("take a break", True, "#d7fcd4")
+        score_rect = score_text.get_rect(center=(640, 200))
+
+        SCREEN.blit(score_text, score_rect)
+
+        SCREEN.blit(MENU_TEXT, MENU_RECT)
         pygame.display.update()
 
 
